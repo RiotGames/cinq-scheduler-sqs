@@ -6,7 +6,7 @@ cinq-scheduler-sqs
 Description
 ===========
 
-This scheduler takes caree of the scheduling the actual SQS 
+This scheduler takes care of scheduling the actual SQS 
 messaging and tracks the status of the jobs as workers are 
 executing said jobs.
 
