@@ -363,7 +363,6 @@ class SQSScheduler(BaseScheduler):
                         else:
                             self.send_worker_queue_message(
                                 batch_id=data['batch_id'],
-                                job_id=data['job_id'],
                                 job_name=data['job_name'],
                                 entry_point=data['entry_point'],
                                 worker_args=data['worker_args'],
