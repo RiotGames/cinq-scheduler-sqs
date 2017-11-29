@@ -150,7 +150,6 @@ class SQSScheduler(BaseScheduler):
                     start_date=start,
                     kwargs={
                         'batch_id': batch_id,
-                        'job_id': str(uuid4()),
                         'job_name': job_name,
                         'entry_point': worker.ep,
                         'worker_args': {}
@@ -186,7 +185,6 @@ class SQSScheduler(BaseScheduler):
                         start_date=start,
                         kwargs={
                             'batch_id': batch_id,
-                            'job_id': str(uuid4()),
                             'job_name': job_name,
                             'entry_point': worker.ep,
                             'worker_args': {
@@ -221,7 +219,6 @@ class SQSScheduler(BaseScheduler):
                             start_date=start,
                             kwargs={
                                 'batch_id': batch_id,
-                                'job_id': str(uuid4()),
                                 'job_name': job_name,
                                 'entry_point': worker.ep,
                                 'worker_args': {
@@ -260,7 +257,6 @@ class SQSScheduler(BaseScheduler):
                 start_date=audit_start,
                 kwargs={
                     'batch_id': batch_id,
-                    'job_id': str(uuid4()),
                     'job_name': job_name,
                     'entry_point': worker.ep,
                     'worker_args': {}
@@ -269,12 +265,11 @@ class SQSScheduler(BaseScheduler):
             audit_start += timedelta(seconds=job_delay)
         # endregion
 
-    def send_worker_queue_message(self, *, batch_id, job_id, job_name, entry_point, worker_args, retry_count=0):
+    def send_worker_queue_message(self, *, batch_id, job_name, entry_point, worker_args, retry_count=0):
         """Send a message to the `worker_queue` for a worker to execute the requests job
 
         Args:
             batch_id (`str`): Unique ID of the batch the job belongs to
-            job_id (`str`): Unique ID of the job
             job_name (`str`): Non-unique ID of the job. This is used to ensure that the same job is only scheduled
             a single time per batch
             entry_point (`dict`): A dictionary providing the entry point information for the worker to load the class
@@ -287,6 +282,7 @@ class SQSScheduler(BaseScheduler):
             `None`
         """
         try:
+            job_id = str(uuid4())
             self.job_queue.send_message(
                 MessageBody=json.dumps({
                     'batch_id': batch_id,
