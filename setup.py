@@ -23,7 +23,7 @@ setuptools.setup(
     install_requires=[
         'cloud-inquisitor~=1.1.0',
         'APScheduler~=3.3.1',
-        'boto3~=1.4.4',
+        'boto3~=1.4',
     ],
     extras_require={
         'dev': [],
