@@ -115,7 +115,7 @@ class SQSScheduler(BaseScheduler):
         self.auditors = []
         self.load_plugins()
 
-        accounts = Account.query.filter_by(enabled=1).all()
+        accounts = db.Account.find(Account.enabled == 1)
         current_jobs = self.list_current_jobs()
         new_jobs = []
         batch_id = str(uuid4())
@@ -431,7 +431,7 @@ class SQSScheduler(BaseScheduler):
                 message.delete()
 
         # Close any batch that is now complete
-        open_batches = SchedulerBatch.query.filter(SchedulerBatch.status < SchedulerStatus.COMPLETED).all()
+        open_batches = db.SchedulerBatch.find(SchedulerBatch.status < SchedulerStatus.COMPLETED)
         for batch in open_batches:
             open_jobs = list(filter(lambda x: x.status < SchedulerStatus.COMPLETED, batch.jobs))
             if not open_jobs:
