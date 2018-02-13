@@ -6,7 +6,7 @@ import boto3.session
 from apscheduler.executors.pool import ProcessPoolExecutor
 from apscheduler.schedulers.blocking import BlockingScheduler as APScheduler
 from botocore.exceptions import ClientError
-from cloud_inquisitor import app, db, AWS_REGIONS
+from cloud_inquisitor import app_config, db, AWS_REGIONS
 from cloud_inquisitor.config import dbconfig, ConfigOption
 from cloud_inquisitor.constants import NS_SCHEDULER_SQS, SchedulerStatus, AccountTypes
 from cloud_inquisitor.exceptions import InquisitorError, SchedulerError
@@ -44,8 +44,8 @@ class SQSScheduler(BaseScheduler):
             }
         )
 
-        access_key = app.config.get('AWS_API_ACCESS_KEY')
-        secret_key = app.config.get('AWS_API_SECRET_KEY')
+        access_key = app_config.aws_api.access_key
+        secret_key = app_config.aws_api.secret_key
         if access_key and secret_key:
             session = boto3.session.Session(access_key, secret_key)
         else:
@@ -231,7 +231,7 @@ class SQSScheduler(BaseScheduler):
         # endregion
 
         # region Auditors
-        if app.config.get('DEBUG', False):
+        if app_config.log_level == 'DEBUG':
             audit_start = start + timedelta(seconds=5)
         else:
             audit_start = start + timedelta(minutes=5)
