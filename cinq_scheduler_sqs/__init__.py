@@ -6,9 +6,10 @@ import boto3.session
 from apscheduler.executors.pool import ProcessPoolExecutor
 from apscheduler.schedulers.blocking import BlockingScheduler as APScheduler
 from botocore.exceptions import ClientError
-from cloud_inquisitor import app, db, AWS_REGIONS
+from cloud_inquisitor import app_config, AWS_REGIONS
 from cloud_inquisitor.config import dbconfig, ConfigOption
 from cloud_inquisitor.constants import NS_SCHEDULER_SQS, SchedulerStatus, AccountTypes
+from cloud_inquisitor.database import db
 from cloud_inquisitor.exceptions import InquisitorError, SchedulerError
 from cloud_inquisitor.plugins import CollectorType, BaseScheduler
 from cloud_inquisitor.schema import Account
@@ -44,8 +45,8 @@ class SQSScheduler(BaseScheduler):
             }
         )
 
-        access_key = app.config.get('AWS_API_ACCESS_KEY')
-        secret_key = app.config.get('AWS_API_SECRET_KEY')
+        access_key = app_config.aws_api.access_key
+        secret_key = app_config.aws_api.secret_key
         if access_key and secret_key:
             session = boto3.session.Session(access_key, secret_key)
         else:
@@ -115,7 +116,7 @@ class SQSScheduler(BaseScheduler):
         self.auditors = []
         self.load_plugins()
 
-        accounts = Account.query.filter_by(enabled=1).all()
+        accounts = db.Account.find(Account.enabled == 1)
         current_jobs = self.list_current_jobs()
         new_jobs = []
         batch_id = str(uuid4())
@@ -231,7 +232,7 @@ class SQSScheduler(BaseScheduler):
         # endregion
 
         # region Auditors
-        if app.config.get('DEBUG', False):
+        if app_config.log_level == 'DEBUG':
             audit_start = start + timedelta(seconds=5)
         else:
             audit_start = start + timedelta(minutes=5)
@@ -431,7 +432,7 @@ class SQSScheduler(BaseScheduler):
                 message.delete()
 
         # Close any batch that is now complete
-        open_batches = SchedulerBatch.query.filter(SchedulerBatch.status < SchedulerStatus.COMPLETED).all()
+        open_batches = db.SchedulerBatch.find(SchedulerBatch.status < SchedulerStatus.COMPLETED)
         for batch in open_batches:
             open_jobs = list(filter(lambda x: x.status < SchedulerStatus.COMPLETED, batch.jobs))
             if not open_jobs:
