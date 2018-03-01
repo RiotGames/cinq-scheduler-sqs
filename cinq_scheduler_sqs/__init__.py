@@ -20,7 +20,6 @@ from cloud_inquisitor.wrappers import retry
 class SQSScheduler(BaseScheduler):
     name = 'SQS Scheduler'
     ns = NS_SCHEDULER_SQS
-    enabled = dbconfig.get('enabled', ns, True)
     options = (
         ConfigOption('queue_region', 'us-west-2', 'string', 'Region of the SQS Queues'),
         ConfigOption('job_queue_url', '', 'string', 'URL of the SQS Queue for pending jobs'),
