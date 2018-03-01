@@ -21,7 +21,7 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     setup_requires=['setuptools_scm'],
     install_requires=[
-        'cloud-inquisitor~=1.1.1',
+        'cloud-inquisitor~=1.1.2',
         'APScheduler~=3.3',
         'boto3~=1.4',
     ],

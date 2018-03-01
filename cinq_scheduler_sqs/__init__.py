@@ -22,7 +22,6 @@ class SQSScheduler(BaseScheduler):
     ns = NS_SCHEDULER_SQS
     enabled = dbconfig.get('enabled', ns, True)
     options = (
-        ConfigOption('enabled', True, 'bool', 'Enable SQS based scheduler'),
         ConfigOption('queue_region', 'us-west-2', 'string', 'Region of the SQS Queues'),
         ConfigOption('job_queue_url', '', 'string', 'URL of the SQS Queue for pending jobs'),
         ConfigOption('status_queue_url', '', 'string', 'URL of the SQS Queue for worker reports'),
