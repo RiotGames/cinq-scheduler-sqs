@@ -2,11 +2,10 @@ import json
 from datetime import datetime, timedelta
 from uuid import uuid4
 
-import boto3.session
 from apscheduler.executors.pool import ProcessPoolExecutor
 from apscheduler.schedulers.blocking import BlockingScheduler as APScheduler
 from botocore.exceptions import ClientError
-from cloud_inquisitor import app_config, AWS_REGIONS
+from cloud_inquisitor import app_config, get_local_aws_session, AWS_REGIONS
 from cloud_inquisitor.config import dbconfig, ConfigOption
 from cloud_inquisitor.constants import NS_SCHEDULER_SQS, SchedulerStatus, AccountTypes
 from cloud_inquisitor.database import db
@@ -45,13 +44,7 @@ class SQSScheduler(BaseScheduler):
             }
         )
 
-        access_key = app_config.aws_api.access_key
-        secret_key = app_config.aws_api.secret_key
-        if access_key and secret_key:
-            session = boto3.session.Session(access_key, secret_key)
-        else:
-            session = boto3.session.Session()
-
+        session = get_local_aws_session()
         sqs = session.resource('sqs', self.dbconfig.get('queue_region', self.ns))
 
         self.job_queue = sqs.Queue(self.dbconfig.get('job_queue_url', self.ns))
