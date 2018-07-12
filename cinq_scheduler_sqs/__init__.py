@@ -7,11 +7,11 @@ from apscheduler.schedulers.blocking import BlockingScheduler as APScheduler
 from botocore.exceptions import ClientError
 from cloud_inquisitor import app_config, get_local_aws_session, AWS_REGIONS
 from cloud_inquisitor.config import dbconfig, ConfigOption
-from cloud_inquisitor.constants import NS_SCHEDULER_SQS, SchedulerStatus, AccountTypes
+from cloud_inquisitor.constants import NS_SCHEDULER_SQS, SchedulerStatus
 from cloud_inquisitor.database import db
 from cloud_inquisitor.exceptions import InquisitorError, SchedulerError
 from cloud_inquisitor.plugins import CollectorType, BaseScheduler
-from cloud_inquisitor.schema import Account
+from cloud_inquisitor.plugins.types.accounts import BaseAccount, AWSAccount
 from cloud_inquisitor.schema.base import SchedulerBatch, SchedulerJob
 from cloud_inquisitor.utils import get_hash
 from cloud_inquisitor.wrappers import retry
@@ -107,7 +107,7 @@ class SQSScheduler(BaseScheduler):
         self.auditors = []
         self.load_plugins()
 
-        accounts = db.Account.find(Account.enabled == 1)
+        _, accounts = BaseAccount.search(include_disabled=False)
         current_jobs = self.list_current_jobs()
         new_jobs = []
         batch_id = str(uuid4())
@@ -151,14 +151,11 @@ class SQSScheduler(BaseScheduler):
         # endregion
 
         # region AWS collectors
+        aws_accounts = list(filter(lambda x: x.account_type == AWSAccount.account_type, accounts))
         if CollectorType.AWS_ACCOUNT in self.collectors:
             for worker in self.collectors[CollectorType.AWS_ACCOUNT]:
-                for account in filter(lambda x: x.account_type == AccountTypes.AWS, accounts):
-                    if account.account_type != AccountTypes.AWS:
-                        continue
-
+                for account in aws_accounts:
                     job_name = get_hash((account.account_name, worker))
-
                     if job_name in current_jobs:
                         continue
 
@@ -189,7 +186,7 @@ class SQSScheduler(BaseScheduler):
         if CollectorType.AWS_REGION in self.collectors:
             for worker in self.collectors[CollectorType.AWS_REGION]:
                 for region in AWS_REGIONS:
-                    for account in filter(lambda x: x.account_type == AccountTypes.AWS, accounts):
+                    for account in aws_accounts:
                         job_name = get_hash((account.account_name, region, worker))
 
                         if job_name in current_jobs:
