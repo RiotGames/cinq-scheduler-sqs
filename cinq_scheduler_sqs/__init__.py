@@ -143,7 +143,7 @@ class SQSScheduler(BaseScheduler):
                     kwargs={
                         'batch_id': batch_id,
                         'job_name': job_name,
-                        'entry_point': worker.ep,
+                        'entry_point': worker.entry_point,
                         'worker_args': {}
                     }
                 )
@@ -175,7 +175,7 @@ class SQSScheduler(BaseScheduler):
                         kwargs={
                             'batch_id': batch_id,
                             'job_name': job_name,
-                            'entry_point': worker.ep,
+                            'entry_point': worker.entry_point,
                             'worker_args': {
                                 'account': account.account_name
                             }
@@ -209,7 +209,7 @@ class SQSScheduler(BaseScheduler):
                             kwargs={
                                 'batch_id': batch_id,
                                 'job_name': job_name,
-                                'entry_point': worker.ep,
+                                'entry_point': worker.entry_point,
                                 'worker_args': {
                                     'account': account.account_name,
                                     'region': region
@@ -247,7 +247,7 @@ class SQSScheduler(BaseScheduler):
                 kwargs={
                     'batch_id': batch_id,
                     'job_name': job_name,
-                    'entry_point': worker.ep,
+                    'entry_point': worker.entry_point,
                     'worker_args': {}
                 }
             )
